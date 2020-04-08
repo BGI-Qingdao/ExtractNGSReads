@@ -33,7 +33,6 @@ function usage(){
 ###########################################################
 # parsing command line parameters
 ###########################################################
-
 echo "CMD :$0 $*"
 while [[ $# > 0 ]] 
 do
@@ -70,6 +69,10 @@ do
             SAMTOOLS=$2
             shift
             ;;
+        "--pairfq")
+            PAIRFQ=$2
+            shift
+            ;;
         "--read2")
             R2=$2
             shift
@@ -88,28 +91,57 @@ done
 ###########################################################
 # santiy check
 ###########################################################
-if [[ ! -e $BWA || ! -e $SAMTOOLS || ! -e $REF || \
-    ! -e $READ1 || ! -e $READ2 || ! -e $PAIRFQ ]] ; then
-    echo "ERROR :santity check failed !"
-    usage
-    exit 1
-fi
+function check_file(){
+    decr=$1
+    file=$2
+    if [[ ! -e $file ]] ; then 
+        echo "\$$decr in : \"$file\" is not exist!!"
+        echo "ERROR :santity check failed !"
+        usage
+        exit 1
+    fi
+}
+check_file 'BWA' $BWA
+check_file 'SAMTOOLS' $SAMTOOLS
+check_file 'REF' $REF
+check_file 'R1' $R1
+check_file 'R2' $R2
+check_file 'PAIRFQ' $PAIRFQ
+echo "Start ..."
 ###########################################################
 # run ...
 ###########################################################
-$BWA mem -@ $CPU $REF $R1 $R2                  >$TEMP_PREFIX".bwa.mem.sam"  2> $TEMP_PREFIX".bwa.mem.log"
+echo "Run bwa mem ..."
+date
+$BWA mem -t $CPU $REF $R1 $R2                  >$TEMP_PREFIX".bwa.mem.sam"  2> $TEMP_PREFIX".bwa.mem.log"
+echo "Run samtools sam2bam ..."
+date
 $SAMTOOLS view -@ $CPU -o $TEMP_PREFIX".bam" -b $TEMP_PREFIX".bwa.mem.sam"  2> $TEMP_PREFIX".sam2bam.log"
+echo "Run samtools sort ..."
+date
 # for samtools_v1.2 sort , instead of the -o parameter ,the results were pr inted into stdout;
 $SAMTOOLS sort -@ $CPU $TEMP_PREFIX".bam"    -o $TEMP_PREFIX".sort.bam" \
                                               1>$TEMP_PREFIX".sort.bam"     2> $TEMP_PREFIX".bamsort.log"
+echo "Run samtools index ..."
+date
 $SAMTOOLS index -bc $TEMP_PREFIX".sort.bam"                                 2> $TEMP_PREFIX".bamindex.log"
+echo "Run samtools view ..."
+date
 $SAMTOOLS view -b $TEMP_PREFIX".sort.bam" $CHR -o $TEMP_PREFIX"."$CHR".bam" 2> $TEMP_PREFIX".bamview.log"
+echo "Run samtools bam2fq ..."
+date
 $SAMTOOLS bam2fq   $TEMP_PREFIX"."$CHR".bam" >$CHR.mixed.fastq              2> $TEMP_PREFIX".bam2fastq.log"
 ###########################################################
 # split into read1 & read2
 ###########################################################
+echo "Run awk ..."
+date
 awk -F '/| ' '{if(FNR%4==1){if($2==1){a=1;}else if($2==2){a=2;}else{print "ERROR unknow header: "$0;}}if(a==1){print $0 >tmp".r1.fastq"}else{print $0>tmp".r2.fastq"}}' tmp=$TEMP_PREFIX $CHR.mixed.fastq
 
+echo "Run pairfq ..."
+date
 $PAIRFQ --input_r1 $TEMP_PREFIX".r1.fastq"  --input_r2 $TEMP_PREFIX".r2.fastq" \
         --output_r1 $CHR".r1.sort.fastq"  --output_r2 $CHR".r2.sort.fastq" \
         --output_rs $CHR".single.fastq"
+echo "All done."
+date
