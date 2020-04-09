@@ -17,7 +17,9 @@ PAIRFQ=$script_path"/filterPairFQ"
 ###########################################################
 function usage(){
     echo "Usage :"
-    echo "    ./extract_reads.sh --read1 r1.fq.gz --read2 r2.fq.gz --ref hg38.fa --chr chr1 [OPTIONS]"
+    echo "    ./extract_reads.sh --read1 r1.fq.gz --read2 r2.fq.gz \\ "
+    echo "                       --ref hg38.fa --chr chr1 \\ "
+    echo "            --bwa /home/sw/bwa --samtools /home/sw/samtools"
     echo ""
     echo "Options :"
     echo "       --read1      read1 file."
