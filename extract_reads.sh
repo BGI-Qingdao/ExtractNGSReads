@@ -10,7 +10,8 @@ REF='hg38.fa'
 CPU=8
 TEMP_PREFIX='temp'
 CHR='chr19'
-PAIRFQ='filterPairFQ'
+script_path=`dirname $0`
+PAIRFQ=$script_path"/filterPairFQ"
 ###########################################################
 # usage 
 ###########################################################
@@ -27,7 +28,6 @@ function usage(){
     echo "       --cpu        multi-thread used. default 8"
     echo "       --bwa        bwa file"
     echo "       --samtools   samtolls file"
-    echo "       --pairfq     pairfq file"
     echo "       -h/--help    print this usage and exit."
 }
 ###########################################################
@@ -69,10 +69,6 @@ do
             SAMTOOLS=$2
             shift
             ;;
-        "--pairfq")
-            PAIRFQ=$2
-            shift
-            ;;
         "--read2")
             R2=$2
             shift
@@ -96,6 +92,9 @@ function check_file(){
     file=$2
     if [[ ! -e $file ]] ; then 
         echo "\$$decr in : \"$file\" is not exist!!"
+        if [[ $decr == "PAIRFQ" ]] ; then 
+            echo "please run 'make' command in $script_path"
+        fi
         echo "ERROR :santity check failed !"
         usage
         exit 1
