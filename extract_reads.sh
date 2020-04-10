@@ -10,8 +10,6 @@ REF='hg38.fa'
 CPU=8
 TEMP_PREFIX='temp'
 CHR='chr19'
-script_path=`dirname $0`
-PAIRFQ=$script_path"/filterPairFQ"
 ###########################################################
 # usage 
 ###########################################################
@@ -94,9 +92,6 @@ function check_file(){
     file=$2
     if [[ ! -e $file ]] ; then 
         echo "\$$decr in : \"$file\" is not exist!!"
-        if [[ $decr == "PAIRFQ" ]] ; then 
-            echo "please run 'make' command in $script_path"
-        fi
         echo "ERROR :santity check failed !"
         usage
         exit 1
@@ -120,7 +115,7 @@ date
 $SAMTOOLS view -@ $CPU -o $TEMP_PREFIX".bam" -b $TEMP_PREFIX".bwa.mem.sam"  2> $TEMP_PREFIX".sam2bam.log"
 echo "Run samtools sort ..."
 date
-# for samtools_v1.2 sort , instead of the -o parameter ,the results were pr inted into stdout;
+# for samtools_v1.2 sort , instead of the -o parameter ,the results were printed into stdout;
 $SAMTOOLS sort -@ $CPU $TEMP_PREFIX".bam"    -o $TEMP_PREFIX".sort.bam" \
                                               1>$TEMP_PREFIX".sort.bam"     2> $TEMP_PREFIX".bamsort.log"
 echo "Run samtools index ..."
@@ -129,20 +124,14 @@ $SAMTOOLS index -bc $TEMP_PREFIX".sort.bam"                                 2> $
 echo "Run samtools view ..."
 date
 $SAMTOOLS view -b $TEMP_PREFIX".sort.bam" $CHR -o $TEMP_PREFIX"."$CHR".bam" 2> $TEMP_PREFIX".bamview.log"
+echo "Run samtools sort ..."
+# for samtools_v1.2 sort , instead of the -o parameter ,the results were printed into stdout;
+$SAMTOOLS sort -@ $CPU $TEMP_PREFIX"."$CHR".bam" -n -o $TEMP_PREFIX"."$CHR".sort.bam" \
+                                              1>$TEMP_PREFIX"."$CHR".sort.bam"\
+                                                                            2> $TEMP_PREFIX".bamsort1.log"
 echo "Run samtools bam2fq ..."
 date
-$SAMTOOLS bam2fq   $TEMP_PREFIX"."$CHR".bam" >$CHR.mixed.fastq              2> $TEMP_PREFIX".bam2fastq.log"
-###########################################################
-# split into read1 & read2
-###########################################################
-echo "Run awk ..."
-date
-awk -F '/| ' '{if(FNR%4==1){if($2==1){a=1;}else if($2==2){a=2;}else{print "ERROR unknow header: "$0;}}if(a==1){print $0 >tmp".r1.fastq"}else{print $0>tmp".r2.fastq"}}' tmp=$TEMP_PREFIX $CHR.mixed.fastq
-
-echo "Run pairfq ..."
-date
-$PAIRFQ --input_r1 $TEMP_PREFIX".r1.fastq"  --input_r2 $TEMP_PREFIX".r2.fastq" \
-        --output_r1 $CHR".r1.sort.fastq"  --output_r2 $CHR".r2.sort.fastq" \
-        --output_rs $CHR".single.fastq"
+$SAMTOOLS bam2fq   $TEMP_PREFIX"."$CHR".sort.bam" -1 $CHR".r1.fastq" \
+     -2 $CHR".r2.fastq" -s $CHR".single.fastq"  -0 /dev/null -N             2> $TEMP_PREFIX".bam2fastq.log"
 echo "All done."
 date

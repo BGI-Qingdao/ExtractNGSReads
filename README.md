@@ -1,15 +1,25 @@
 # ExtractNGSReads
 extract subset of  NGS PE reads 
 
-## INSTALl
+## DOWNLOAD
 
 ```
 git clone https://github.com/BGI-Qingdao/ExtractNGSReads.git
+```
+##COMPILE
+
+compile the code only when you use ```mixed_2_paired.sh```
+
+
+```
 cd ExtractNGSReads
 make
+
 ```
 
 ## Usage
+
+* To extract reads that mapped a certain chromesome
 
 ```
 ./extract_reads.sh -h
@@ -27,6 +37,19 @@ Options :
        --cpu        multi-thread used. default 8
        --bwa        bwa file
        --samtools   samtolls file
+       -h/--help    print this usage and exit.
+```
+
+* To separate r1 and r2 from one unsort and mixed fastq
+
+```
+Usage :
+    ./mixed_2_paired.sh --input mixed.fq --out_prefix test \
+
+Options :
+       --input        input file that contain both read1 and read2.
+       --output       output file name prefix.
+       --temp         temporary file name prefix.
        -h/--help    print this usage and exit.
 ```
 
