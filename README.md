@@ -6,7 +6,7 @@ extract subset of  NGS PE reads
 ```
 git clone https://github.com/BGI-Qingdao/ExtractNGSReads.git
 ```
-##COMPILE
+## COMPILE
 
 compile the code only when you use ```mixed_2_paired.sh```
 
