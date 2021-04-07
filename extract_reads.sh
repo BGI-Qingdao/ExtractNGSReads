@@ -102,7 +102,7 @@ check_file 'SAMTOOLS' $SAMTOOLS
 check_file 'REF' $REF
 check_file 'R1' $R1
 check_file 'R2' $R2
-check_file 'PAIRFQ' $PAIRFQ
+## check_file 'PAIRFQ' $PAIRFQ
 echo "Start ..."
 ###########################################################
 # run ...
