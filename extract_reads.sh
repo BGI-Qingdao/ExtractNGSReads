@@ -107,6 +107,13 @@ echo "Start ..."
 ###########################################################
 # run ...
 ###########################################################
+
+if [[ ! -e $REF".pac" ]] ; then
+    echo "Index ref"
+    $BWA index $REF 2>$TEMP_PREFIX".bwa.index.log"
+else
+    echo "Use old ref index..."
+fi
 echo "Run bwa mem ..."
 date
 $BWA mem -t $CPU $REF $R1 $R2                  >$TEMP_PREFIX".bwa.mem.sam"  2> $TEMP_PREFIX".bwa.mem.log"
