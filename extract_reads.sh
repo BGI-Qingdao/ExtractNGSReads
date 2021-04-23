@@ -130,7 +130,7 @@ date
 $SAMTOOLS index -bc $TEMP_PREFIX".sort.bam"                                 2> $TEMP_PREFIX".bamindex.log"
 echo "Run samtools view ..."
 date
-$SAMTOOLS view -b $TEMP_PREFIX".sort.bam" $CHR -o $TEMP_PREFIX"."$CHR".bam" 2> $TEMP_PREFIX".bamview.log"
+$SAMTOOLS view -F 2304 -b $TEMP_PREFIX".sort.bam" $CHR -o $TEMP_PREFIX"."$CHR".bam" 2> $TEMP_PREFIX".bamview.log"
 echo "Run samtools sort ..."
 # for samtools_v1.2 sort , instead of the -o parameter ,the results were printed into stdout;
 $SAMTOOLS sort -@ $CPU $TEMP_PREFIX"."$CHR".bam" -n -o $TEMP_PREFIX"."$CHR".sort.bam" \
