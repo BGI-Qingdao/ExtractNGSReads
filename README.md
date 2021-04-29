@@ -36,7 +36,7 @@ Options :
        --temp       prefix of temporary files. default temp.
        --cpu        multi-thread used. default 8
        --bwa        bwa file
-       --samtools   samtolls file
+       --samtools   samtools file
        -h/--help    print this usage and exit.
 ```
 
